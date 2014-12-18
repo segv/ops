@@ -2,7 +2,6 @@
 use Modern::Perl;
 use autodie qw(:all);
 use Data::Dumper;
-
 use Getopt::Long;
 use Email::Address;
 
@@ -45,7 +44,7 @@ while (my $line = <$keyfile>) {
   if ($line =~ /^\S+\s+\S+\s+(.*)$/) {
     $key = { full => $line, comment => $1 };
   } else {
-    die "Unable to parse keyline in $keyfile:$.";
+    die "Unable to parse keyline $line in $keyfile:$.";
   }
 }
 
@@ -71,7 +70,7 @@ if ($component eq "comment") {
   }
 }
 
-if ($n) {
+if (! $n) {
   print "\n";
 }
 

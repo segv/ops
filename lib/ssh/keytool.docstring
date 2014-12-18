@@ -1,6 +1,9 @@
-ssh.keytool FILENAME [ comment | key | email | name ]
+ssh.keytool [ -n ] FILENAME [ comment | key | email | name ]
 
 Extracts either the comment, key, email or name (these later two
 assuming the comment is a properly formated email) from an ssh key.
 
 If FILENAME is "-" reads the key (as a single line) from stdin.
+
+If the -n argument is present the trailing newline in the output will
+be suppressed.
