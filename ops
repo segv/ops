@@ -1,0 +1,113 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use FindBin qw($RealBin);
+
+use English;
+use Getopt::Long;
+use Data::Dumper;
+use JSON::PP;
+
+if ($ENV{OPS_STATE}) {
+  die "Nested ops calls, sorry.";
+}
+
+my @arg_path = ();
+my $directory = undef;
+
+while (@ARGV) {
+  my $next = $ARGV[0];
+  if ($next eq '-p' || $next eq '--path') {
+    if (! $ARGV[1]) {
+      die "Missing required argument PATH to $next";
+    }
+    push @arg_path, $ARGV[1];
+    shift(@ARGV);
+    shift(@ARGV);
+    next;
+  }
+
+  if ($next =~ /^--path=(.*)/) {
+    push @arg_path, $1;
+    shift(@ARGV);
+    next;
+  }
+
+  if ($next eq '--directory' || $next eq '-C') {
+    if (! $ARGV[1]) {
+      die "Missing required argument DIRECTORY to $next";
+    }
+    if (defined($directory)) {
+      die "Multiple directory arguments passed. Sorry.";
+    }
+    $directory = $ARGV[1];
+    shift(@ARGV);
+    shift(@ARGV);
+    next;
+  }
+
+  if ($next =~ /^(--directory=|-C)(.*)/) {
+    if (defined($directory)) {
+      die "Multiple directory arguments passed. Sorry.";
+    }
+    $directory = $1;
+    shift(@ARGV);
+    next;
+  }
+
+  if ($next =~ /^(-h|--help)$/) {
+    help();
+    exit 0;
+  }
+  last;
+}
+
+sub help {
+  say "ops [ -p PATH ] object.method"
+}
+
+if (! defined($directory)) {
+  $directory = $RealBin;
+}
+
+if (-e $directory) {
+  chdir $directory;
+} else {
+  die "Attempt to start in $directory, which does not exist.";
+}
+
+# Set the path from the cli, then the arguments, then the builtin defaults
+my @path;
+if (defined $ENV{OPS_PATH}) {
+  if ("" eq $ENV{OPS_PATH}) {
+    # how much sense does this make, really?
+    @path = ();
+  } else {
+    @path = split(/:/, $ENV{OPS_PATH});
+    if ($ENV{OPS_PATH} !~ /:\z/) {
+      @path = (@path, "$RealBin/lib/");
+    }
+  }
+  delete $ENV{OPS_PATH};
+} else {
+  @path = ("$RealBin/lib/");
+}
+
+@path = (@arg_path, @path);
+
+$ENV{OPS_STATE} = encode_json({ path => [ @path ] });
+$ENV{PATH} = "$directory/libexec/:$ENV{PATH}";
+
+my $local_lib = "$directory/perl5lib/";
+
+if ($ENV{PERL5LIB}) {
+  $ENV{PERL5LIB} = "$local_lib:$ENV{PERL5LIB}";
+} else {
+  $ENV{PERL5LIB} = "$local_lib";
+}
+
+push @INC, $local_lib;
+require App::Ops::Logging;
+
+App::Ops::Logging::DEBUG("Calling:" => [ "call", @ARGV]);
+
+exec("call", @ARGV);

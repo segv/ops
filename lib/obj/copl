@@ -1,0 +1,10 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use App::Ops::Object;
+use Data::Dumper;
+use JSON::PP qw(encode_json);
+
+my $object = shift(@ARGV);
+die "Missing required argument OBJECT" unless $object;
+
+print encode_json([ map { $_->name } App::Ops::Object->new({ name => $object })->compute_object_precedence_list ]);

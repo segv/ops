@@ -1,0 +1,6 @@
+#!/bin/bash
+echo z.around:before
+if [ "$1" = "call-next" ]; then
+    next
+fi
+echo z.around:after

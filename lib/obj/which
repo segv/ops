@@ -1,0 +1,15 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use App::Ops::Member;
+use Data::Dumper;
+
+my $spec = shift(@ARGV);
+die "Missing required argument SPEC" unless $spec;
+
+my $location = App::Ops::Member->new({ spec => $spec })->location();
+if ($location) {
+  say $location;
+  exit 0;
+} else {
+  exit 1;
+}

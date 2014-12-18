@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+function install_perl_module {
+    local perl_name=$1
+    local apt_name
+
+    if [ -z ${2+x} ]; then
+        apt_name=$(echo $1 | perl -npe 's/\s+//g; tr/A-Z/a-z/; s/::/-/g; $_ = "lib$_-perl"')
+    fi
+
+    if which cpanm; then
+        echo "CPANM: $perl_name"
+        cpanm $perl_name;
+    else
+        echo "APT: $apt_name"
+        apt-get -qq install -y $apt_name
+    fi
+}
+
+echo "perl"
+if [ ! `which perl` ]; then
+    apt-get install -qq -y perl
+fi
+echo "APT: libapt-pkg-perl"
+apt-get install -qq -y libapt-pkg-perl
+install_perl_module "File::chdir"
+install_perl_module "Modern::Perl"
+install_perl_module "Email::Address"
+# autodie :all requires this (and it's super useful anyway)
+install_perl_module "IPC::System::Simple"
+install_perl_module "File::Slurp"
+install_perl_module "Moo"

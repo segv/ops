@@ -1,0 +1,5 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use App::Ops::State;
+
+say join(':', @{ App::Ops::State->new()->state->{path} });

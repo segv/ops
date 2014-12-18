@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use App::Ops::Member;
+use Data::Dumper;
+use JSON::PP qw(encode_json);
+
+my $method_spec = shift(@ARGV);
+
+die "Missing required argument METHOD_SPEC" unless $method_spec;
+
+my %methods = ();
+
+my $meths = App::Ops::Member->new({ spec => $method_spec })->compute_applicable_methods;
+
+foreach my $kind (keys %{ $meths }) {
+  $methods{$kind} = [ map { $_->method_spec } @{ $meths->{$kind} } ];
+}
+
+print encode_json(\%methods);

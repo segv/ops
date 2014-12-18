@@ -1,0 +1,78 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use autodie qw(:all);
+use Data::Dumper;
+
+use Getopt::Long;
+use Email::Address;
+
+my $n = 0;
+
+GetOptions("n" => \$n);
+
+my $keyfilename = shift(@ARGV);
+
+if (! defined($keyfilename)) {
+  die "Missing required arugment KEYFILENAME.";
+} elsif (! ($keyfilename eq "-" || -e $keyfilename) ) {
+  die "File $keyfilename does not exist.";
+}
+
+my $component = shift(@ARGV);
+
+if (! defined($component)) {
+  $component = "comment";
+}
+
+my $keyfile;
+
+if ($keyfilename eq "-") {
+  open $keyfile, "<-";
+} else {
+  open $keyfile, "<", $keyfilename;
+}
+
+my $key = undef;
+
+while (my $line = <$keyfile>) {
+  chomp $line;
+  next if $line =~ /^\s*#/;
+  next if $line =~ /^\s*$/;
+  if (defined $key) {
+    die "Too many keys in $keyfile, exactly one expected.";
+  }
+  chomp $line;
+  if ($line =~ /^\S+\s+\S+\s+(.*)$/) {
+    $key = { full => $line, comment => $1 };
+  } else {
+    die "Unable to parse keyline in $keyfile:$.";
+  }
+}
+
+close $keyfile;
+
+if ($component eq "comment") {
+  print $key->{comment};
+} elsif ($component eq "key") {
+  print $key->{full};
+} else {
+  my @emails = Email::Address->parse($key->{comment});
+
+  if (scalar(@emails) != 1) {
+    die "Error parsing " . $key->{comment} . " (wrong number of emails found).";
+  }
+
+  if ($component eq "email") {
+    print $emails[0]->address;
+  } elsif ($component eq "name") {
+    print $emails[0]->phrase;
+  } else {
+    die "Unknown component $component";
+  }
+}
+
+if ($n) {
+  print "\n";
+}
+
+exit 0;

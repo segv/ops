@@ -1,0 +1,29 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use App::Ops::Member;
+use App::Ops::State;
+use English;
+use File::Basename;
+
+die "get must executed via ops, not directly." unless $ENV{OPS_STATE};
+
+my $name = fileparse($PROGRAM_NAME);
+
+my $state = App::Ops::State->new();
+
+my ($spec, @arguments) = @ARGV;
+
+if ($name eq 'next') {
+  App::Ops::Member::do_call_next_method(@arguments);
+} elsif (defined $spec) {
+  my $member = App::Ops::Member->new({ spec => $spec });
+  if ($name eq 'call') {
+    exit $member->do_call(@arguments);
+  } elsif ($name eq 'prop') {
+    exit $member->do_prop(@arguments);
+  }
+} else {
+  die "Missing required argument OBJECT.METHOD";
+}
+
+

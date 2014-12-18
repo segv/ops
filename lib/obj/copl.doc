@@ -1,0 +1,4 @@
+obj.copl object-name
+
+Computes the given object "precedence list," the ordered list of
+parent objects starting at the given object.
