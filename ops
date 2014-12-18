@@ -89,12 +89,12 @@ if (defined $ENV{OPS_PATH}) {
   }
   delete $ENV{OPS_PATH};
 } else {
-  @path = ("$RealBin/lib/");
+  @path = ("/var/lib/ops/", "$RealBin/lib/");
 }
 
 @path = (@arg_path, @path);
 
-$ENV{OPS_STATE} = encode_json({ path => [ @path ] });
+$ENV{OPS_STATE} = encode_json({ path => [ grep { -d $_ } @path ] });
 $ENV{PATH} = "$directory/libexec/:$ENV{PATH}";
 
 my $local_lib = "$directory/perl5lib/";
