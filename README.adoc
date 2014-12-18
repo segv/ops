@@ -1,0 +1,41 @@
+= ops - a script based system configuration/management toolkit
+
+== Scope
+
+The goal of ops is to make it easy to organize scripts.
+
+== Design
+
+Each directory is an object (in the prototype based object oriented
+programming sense of the term). Each executable is a method and each
+non-executable file is a property.
+
+Call a method on an object via
+
+----
+ops <object>.<method>
+----
+
+Inside a method call other methods via call:
+
+----
+call <object>.<method>
+----
+
+or on the object:
+
+----
+call this.<method>
+----
+
+get a property via prop:
+
+----
+prop this.<member>
+----
+
+get a property's filename with the -f flag:
+
+----
+prop this.<member> -f
+----
