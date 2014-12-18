@@ -31,3 +31,5 @@ install_perl_module "Email::Address"
 install_perl_module "IPC::System::Simple"
 install_perl_module "File::Slurp"
 install_perl_module "Moo"
+
+ln -s `pwd`/ops ../../bin/ops
