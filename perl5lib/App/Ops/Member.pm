@@ -233,14 +233,12 @@ sub do_call_next_method {
 
 sub do_prop {
   my ($self, @arguments) = @_;
-  my $z = 0; # end with null char
-  my $n = 0; # don't output anything after the property
   my $e = 0; # exit with 1 if not found
   my $q = 0; # suppress error message
   my $f = 0; # output the filename of the property
 
   Getopt::Long::Configure("bundling");
-  GetOptions("z" => \$z, "n" => \$n, "e" => \$e, "q" => \$q, "f" => \$f);
+  GetOptions("e" => \$e, "q" => \$q, "f" => \$f);
 
   my $location = $self->location() || "";
   if ($e && ! $location) {
@@ -251,9 +249,6 @@ sub do_prop {
   }
   if ($f) {
     print $location;
-    if (! $n) {
-      print "\n";
-    }
   } else {
     print read_file $location;
   }
