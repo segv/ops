@@ -1,0 +1,57 @@
+#!perl
+use Modern::Perl;
+use File::Slurp;
+
+my $ssh = "$ENV{HOME}/.ssh/";
+my $authorized_keys = "$ssh/authorized_keys";
+
+if (! -e $ssh) {
+  system("mkdir -m 0700 $ssh");
+}
+
+if (! -e $authorized_keys) {
+  system("touch $authorized_keys");
+} else {
+  system("cp $authorized_keys $authorized_keys~");
+}
+
+chmod 0600, $authorized_keys;
+
+open my $AUTHORIZED_KEYS, ">>", $authorized_keys;
+
+foreach my $keyfile (@ARGV) {
+  if ($keyfile eq "-") {
+    while (<STDIN>) {
+      # use chomp+say so that we get exactly 1 newline in the file
+      chomp($_);
+      say $AUTHORIZED_KEYS $_;
+    }
+  } else {
+    print $AUTHORIZED_KEYS read_file($keyfile);
+  }
+}
+
+
+close $AUTHORIZED_KEYS;
+
+# now remove duplicates (but preserve order)
+
+my @lines = read_file($authorized_keys);
+
+system("cp $authorized_keys $authorized_keys~");
+
+open $AUTHORIZED_KEYS, ">", $authorized_keys;
+
+my %seen = ();
+foreach my $line (@lines) {
+  if ($line =~ /^\s*$/ || $line =~ /^\s*#/) {
+    print $AUTHORIZED_KEYS $line;
+  } else {
+    if (! $seen{$line}) {
+      print $AUTHORIZED_KEYS $line;
+    }
+    $seen{$line} = 1;
+  }
+}
+close $AUTHORIZED_KEYS;
+
