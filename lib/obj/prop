@@ -1,0 +1,9 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use App::Ops::Member;
+
+my $member_spec = shift(@ARGV);
+
+die "Missing required argument MEMBER_SPEC" unless $member_spec;
+
+system("prop", $member_spec, @ARGV);
